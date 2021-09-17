@@ -13,7 +13,7 @@ PRAKTIKUM_TOKEN = os.getenv('PRAKTIKUM_TOKEN')
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 PRAKTIKUM_URL = 'https://praktikum.yandex.ru/api/user_api/homework_statuses/'
-current_timestamp = int(time.time()) - 4000  # для int(time.time()) падает с ошибкой
+current_timestamp = int(time.time()) - 86400  # для int(time.time()) падает с ошибкой: 86400 == 1 день
 
 
 bot = telegram.Bot(TELEGRAM_TOKEN)
@@ -87,7 +87,7 @@ def send_message(message):
 
 
 def main():
-    current_timestamp = int(time.time()) - 4000
+    current_timestamp = int(time.time()) - 86400
     file_debug_logger()
 
     while True:
