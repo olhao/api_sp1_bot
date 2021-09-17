@@ -13,7 +13,7 @@ PRAKTIKUM_TOKEN = os.getenv('PRAKTIKUM_TOKEN')
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 PRAKTIKUM_URL = 'https://praktikum.yandex.ru/api/user_api/homework_statuses/'
-current_timestamp = int(time.time())  # 1629105077
+current_timestamp = int(time.time()) - 4000  # для int(time.time()) падает с ошибкой
 
 
 bot = telegram.Bot(TELEGRAM_TOKEN)
@@ -87,12 +87,13 @@ def send_message(message):
 
 
 def main():
-    current_timestamp = int(time.time())
+    current_timestamp = int(time.time()) - 4000
     file_debug_logger()
-    homework = get_homeworks(current_timestamp=current_timestamp)
-    message = parse_homework_status(homework)
+
     while True:
         try:
+            homework = get_homeworks(current_timestamp=current_timestamp)['homeworks'][0]
+            message = parse_homework_status(homework)
             send_message(message)
             file_info_logger()
             time.sleep(20 * 60)  # Опрашивать раз в 20 минут
@@ -102,7 +103,7 @@ def main():
             bot.send_message(CHAT_ID, message)
             stream_error_logger()
             file_error_logger()
-            time.sleep(5)
+            time.sleep(20 * 60)
 
 
 if __name__ == '__main__':
