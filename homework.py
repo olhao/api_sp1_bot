@@ -77,13 +77,14 @@ def main():
             message = parse_homework_status(homework)
             send_message(message)
             logging.info('Сообщение отправлено')
-            time.sleep(20 * 60)
+            time.sleep(1800)
 
         except Exception as e:
             message = f'Бот упал с ошибкой: {e}'
             bot.send_message(CHAT_ID, message)
             logging.exception('Бот не смог отправить сообщение')
             logging.error('Бот не смог отправить сообщение', exc_info=True)
+            time.sleep(1800)
 
 
 if __name__ == '__main__':
