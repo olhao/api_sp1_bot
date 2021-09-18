@@ -48,9 +48,10 @@ def parse_homework_status(homework):
 def send_message(message):
     try:
         return bot.send_message(CHAT_ID, message)
-    except Exception:
-        # здесь имя не нужно logging.exception уже выводит всю необходимую информацию с описание ексепшина
-        logging.exception(f'Бот не смог отправить сообщение')
+    except Exception as exception:
+        #  здесь имя не нужно logging.exception уже
+        #  выводит всю необходимую информацию с описание ексепшина
+        logging.exception(f'Бот не смог отправить сообщение {exception}')
 
 
 def main():
@@ -67,7 +68,7 @@ def main():
     logger.addHandler(file_handler)
     logging.debug('Бот запущен')
     #  для int(time.time()) падает с ошибкой: 86400 == 1 день
-    current_timestamp = int(time.time()) - 24*60*60
+    current_timestamp = int(time.time()) - (24 * 60 * 60)
     while True:
         try:
             homework = get_homeworks(
@@ -81,7 +82,7 @@ def main():
             send_message(message)
             logging.exception('Бот не смог отправить сообщение')
             logging.error('Бот не смог отправить сообщение', exc_info=True)
-        time.sleep(20*60)
+        time.sleep(20 * 60)
 
 
 if __name__ == '__main__':
