@@ -19,11 +19,11 @@ VERDICTS = {'rejected': 'К сожалению, в работе нашлись �
 
 bot = telegram.Bot(TELEGRAM_TOKEN)
 
-logging.basicConfig(
-        level=logging.DEBUG,
-        filename=__file__ + '.log',
-        format='%(asctime)s, %(levelname)s, %(message)s, %(name)s',
-        filemode='a',)
+logging.basicConfig(level=logging.DEBUG,
+                    filename=__file__ + '.log',
+                    format='%(asctime)s, %(levelname)s, %(message)s, %(name)s',
+                    filemode='a',)
+
 
 def get_homeworks(current_timestamp):
     try:
@@ -44,12 +44,12 @@ def parse_homework_status(homework):
         return ('У вас проверили работу '
                 f'"{homework_name}"!\n\n{VERDICTS[homework_status]}')
     #  IndexError - Raised when a sequence subscript is out of range
-    ''' exception ValueError
-    Raised when an operation or function receives 
-    an argument that has the right type but an inappropriate value, 
-    and the situation is not described by a more precise exception such as'''
+
+    '''exception ValueError - Raised when an operation or function receives
+        an argument that has the right type but an inappropriate value,
+        and the situation is not described by a more
+        precise exception such as IndexError'''
     '''Traceback (most recent call last):
-        File ...homework.py, line 75, in main
         homework = get_homeworks(
         IndexError: list index out of range'''
     raise IndexError(f'Статус работы {homework_status} не найден.')
@@ -61,7 +61,8 @@ def send_message(message):
     except Exception:
         #  здесь имя не нужно logging.exception уже
         #  выводит всю необходимую информацию с описание ексепшина
-        logging.exception(f'Бот не смог отправить сообщение')
+        logging.exception('Бот не смог отправить сообщение')
+
 
 def main():
     logging.debug('Бот запущен')
@@ -76,7 +77,8 @@ def main():
             message = parse_homework_status(homework)
             send_message(message)
             # этот ивент попадает в лог только если сообщение отправлено,
-            # т.к. находит внутри трай. в случае ексепшина он не записывается в лог файл
+            # т.к. находит внутри трай.
+            # в случае ексепшина он не записывается в лог файл
             logging.info('Сообщение отправлено')
 
         except Exception as exception:
