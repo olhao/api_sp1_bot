@@ -11,7 +11,7 @@ load_dotenv()
 PRAKTIKUM_TOKEN = os.getenv('PRAKTIKUM_TOKEN')
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
-PRAKTIKUM_URL = 'https://practicum.yandex.ru/api/user_api/homework_statuses/'
+PRAKTIKUM_URL = 'https://praktikum.yandex.ru/api/user_api/homework_statuses/'
 HEADERS = {'Authorization': f'OAuth {PRAKTIKUM_TOKEN}'}
 VERDICTS = {'rejected': 'К сожалению, в работе нашлись ошибки.',
             'reviewing': 'Pабота взята в ревью.',
