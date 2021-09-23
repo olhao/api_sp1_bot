@@ -20,70 +20,71 @@ VERDICTS = {'rejected': 'К сожалению, в работе нашлись �
 bot = telegram.Bot(TELEGRAM_TOKEN)
 
 
+class ExceptionErrorStatuses(Exception):
+    pass
+
+
 def get_homeworks(current_timestamp):
     try:
         homework_statuses = requests.get(
             PRAKTIKUM_URL,
             headers=HEADERS,
             params={'from_date': current_timestamp})
-        if homework_statuses.json()["homeworks"]:
-            homework = homework_statuses.json()["homeworks"][0]
-            if "code" in homework or "error" in homework:
-                raise Exception('Произошла ошибка при выполнении запроса -'
-                                f' {homework["code"]}, {homework["error"]}')
-            raise ValueError('Статус работы не найден.')
     except requests.exceptions.RequestException as request_exception:
         raise ConnectionError('Произошла ошибка соединения при запросе -'
                               f' {request_exception}'
                               'Проверьте параметры: '
-                              f'PRAKTIKUM_URL: {PRAKTIKUM_URL} '
-                              f'HEADERS: {HEADERS} '
-                              f'current_timestamp: {current_timestamp}')
+                              f'PRAKTIKUM_URL: {PRAKTIKUM_URL}, '
+                              f'HEADERS: {HEADERS}, '
+                              f'from_date: {current_timestamp}')
+
+    errors = ["code", "error"]
+    for error in errors:
+        if error in homework_statuses.json()["homeworks"][0]:
+            raise ExceptionErrorStatuses('Произошла ошибка '
+                                         'при выполнении запроса'
+                                         f' {error}.'
+                                         f'Проверьте параметры запроса:'
+                                         f'код - {homework_statuses} ,'
+                                         'респонз - '
+                                         f'{homework_statuses.json()}')
     return homework_statuses.json()
 
 
 def parse_homework_status(homework):
-    homework_name = homework['homework_name']
-    homework_status = homework['status']
+    status = homework['status']
 
-    if homework_status in VERDICTS:
+    if status in VERDICTS:
         return ('У вас проверили работу '
-                f'"{homework_name}"!\n\n{VERDICTS[homework_status]}')
-    raise ValueError(f'Статус работы {homework_status} не найден.')
+                f'"{homework["homework_name"]}"!\n\n{VERDICTS[status]}')
+    raise ValueError(f'Статус работы {status} не найден.')
 
 
 def send_message(message):
     try:
         bot.send_message(CHAT_ID, message)
-        logging.info('Сообщение отправлено')
+        #  логирование отправки сообщения в телеграм
+        logging.info(f'Сообщение отправлено. Текст сообщения: {message}')
     except Exception:
         logging.exception('Бот не смог отправить сообщение')
 
 
-def get_homework_date():
-    current_timestamp = int(time.time())
-    homework_statuses = requests.get(
-        PRAKTIKUM_URL,
-        headers=HEADERS,
-        params={'from_date': current_timestamp})
-    homework_date = homework_statuses.json()["current_date"]
-    return homework_date
-
-
 def main():
     logging.debug('Бот запущен')
-    current_timestamp = get_homework_date()
+    current_timestamp = int(time.time())
 
     while True:
         try:
-            homework = get_homeworks(
-                current_timestamp)['homeworks'][0]
+            homeworks = get_homeworks(current_timestamp)
+            homework = homeworks['homeworks'][0]
+            #  homework_date = homework['current_date']
             message = parse_homework_status(homework)
             send_message(message)
 
         except Exception as exception:
             message = f'Ошибка: {exception}'
             send_message(message)
+            # логирование отправки сообщения в телеграм во время эксепшина
             logging.info('Сообщение об ошибке отправлено в telegram -'
                          f' {message}')
             logging.exception(f'Произошла ошибка {exception}')
