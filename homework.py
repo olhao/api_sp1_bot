@@ -40,7 +40,7 @@ def get_homeworks(current_timestamp):
 
     errors = ["code", "error"]
     for error in errors:
-        if error in homework_statuses.json()["homeworks"][0]:
+        if error in homework_statuses.json()["homeworks"]:
             raise ExceptionErrorStatuses('Произошла ошибка '
                                          'при выполнении запроса'
                                          f' {error}.'
