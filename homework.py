@@ -74,9 +74,11 @@ def main():
     logging.debug('Бот запущен')
     current_timestamp = int(time.time())
     homeworks = get_homeworks(current_timestamp)
+    current_date = homeworks["current_date"]
 
     while True:
         try:
+            homeworks = get_homeworks(current_date)
             homework = homeworks['homeworks'][0]
             message = parse_homework_status(homework)
             send_message(message)
