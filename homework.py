@@ -11,7 +11,7 @@ load_dotenv()
 PRAKTIKUM_TOKEN = os.getenv('PRAKTIKUM_TOKEN')
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
-PRAKTIKUM_URL = 'https://praktikum.yandex.ru/api/user_api/homework_statuses/'
+PRAKTIKUM_URL = 'https://practicum.yandex.ru/api/user_api/homework_statuses/'
 HEADERS = {'Authorization': f'OAuth {PRAKTIKUM_TOKEN}'}
 VERDICTS = {'rejected': 'К сожалению, в работе нашлись ошибки.',
             'reviewing': 'Pабота взята в ревью.',
@@ -25,30 +25,32 @@ class ExceptionErrorStatuses(Exception):
 
 
 def get_homeworks(current_timestamp):
+    params = {'from_date': current_timestamp}
     try:
         homework_statuses = requests.get(
             PRAKTIKUM_URL,
             headers=HEADERS,
-            params={'from_date': current_timestamp})
+            params=params)
     except requests.exceptions.RequestException as request_exception:
         raise ConnectionError('Произошла ошибка соединения при запросе -'
                               f' {request_exception}'
                               'Проверьте параметры: '
                               f'PRAKTIKUM_URL: {PRAKTIKUM_URL}, '
                               f'HEADERS: {HEADERS}, '
-                              f'from_date: {current_timestamp}')
+                              f'{params}')
 
+    response = homework_statuses.json()
     errors = ["code", "error"]
     for error in errors:
-        if error in homework_statuses.json()["homeworks"]:
+        if error in response:
             raise ExceptionErrorStatuses('Произошла ошибка '
-                                         'при выполнении запроса'
-                                         f' {error}.'
-                                         f'Проверьте параметры запроса:'
-                                         f'код - {homework_statuses} ,'
-                                         'респонз - '
-                                         f'{homework_statuses.json()}')
-    return homework_statuses.json()
+                                         'при выполнении запроса.'
+                                         f'Значение ошибки: {response[error]}.'
+                                         'Отправленные параметры: '
+                                         f'PRAKTIKUM_URL: {PRAKTIKUM_URL}, '
+                                         f'HEADERS: {HEADERS}, '
+                                         f'{params}')
+    return response
 
 
 def parse_homework_status(homework):
@@ -63,7 +65,6 @@ def parse_homework_status(homework):
 def send_message(message):
     try:
         bot.send_message(CHAT_ID, message)
-        #  логирование отправки сообщения в телеграм
         logging.info(f'Сообщение отправлено. Текст сообщения: {message}')
     except Exception:
         logging.exception('Бот не смог отправить сообщение')
@@ -72,22 +73,20 @@ def send_message(message):
 def main():
     logging.debug('Бот запущен')
     current_timestamp = int(time.time())
+    homeworks = get_homeworks(current_timestamp)
 
     while True:
         try:
-            homeworks = get_homeworks(current_timestamp)
             homework = homeworks['homeworks'][0]
-            #  homework_date = homework['current_date']
             message = parse_homework_status(homework)
             send_message(message)
 
         except Exception as exception:
             message = f'Ошибка: {exception}'
+            logging.exception(f'Произошла ошибка {exception}')
             send_message(message)
-            # логирование отправки сообщения в телеграм во время эксепшина
             logging.info('Сообщение об ошибке отправлено в telegram -'
                          f' {message}')
-            logging.exception(f'Произошла ошибка {exception}')
         time.sleep(20 * 60)
 
 
