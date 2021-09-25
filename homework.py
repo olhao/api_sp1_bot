@@ -54,12 +54,11 @@ def get_homeworks(current_timestamp):
 
 
 def parse_homework_status(homework):
-    status = homework['status']
-
-    if status in VERDICTS:
+    if homework['status'] in VERDICTS:
         return ('У вас проверили работу '
-                f'"{homework["homework_name"]}"!\n\n{VERDICTS[status]}')
-    raise ValueError(f'Статус работы {status} не найден.')
+                f'"{homework["homework_name"]}"!\n\n'
+                f'{VERDICTS[homework["status"]]}')
+    raise ValueError(f'Статус работы {homework["status"]} не найден.')
 
 
 def send_message(message):
@@ -73,11 +72,11 @@ def send_message(message):
 def main():
     logging.debug('Бот запущен')
     current_timestamp = int(time.time())
-    homeworks = get_homeworks(current_timestamp)
-    current_date = homeworks["current_date"]
 
     while True:
         try:
+            homeworks = get_homeworks(current_timestamp)
+            current_date = homeworks["current_date"]
             homeworks = get_homeworks(current_date)
             homework = homeworks['homeworks'][0]
             message = parse_homework_status(homework)
@@ -87,8 +86,6 @@ def main():
             message = f'Ошибка: {exception}'
             logging.exception(f'Произошла ошибка {exception}')
             send_message(message)
-            logging.info('Сообщение об ошибке отправлено в telegram -'
-                         f' {message}')
         time.sleep(20 * 60)
 
 
