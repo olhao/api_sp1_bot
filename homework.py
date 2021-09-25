@@ -76,8 +76,7 @@ def main():
     while True:
         try:
             homeworks = get_homeworks(current_timestamp)
-            current_date = homeworks["current_date"]
-            homeworks = get_homeworks(current_date)
+            current_timestamp = homeworks["current_date"]
             homework = homeworks['homeworks'][0]
             message = parse_homework_status(homework)
             send_message(message)
